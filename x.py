@@ -3,35 +3,75 @@ from SortedSet.sorted_set import SortedSet
 from itertools import combinations
 
 
-def get_years(dataset):
-    open_dataset = xr.open_dataset(dataset)
-    first_year_in_dataset = open_dataset.variables['time_bnds'][0].data[0].strftime('%Y')
-    print(first_year_in_dataset)
-    if first_year_in_dataset > '2019':
-        return None
-    else:
-        df = open_dataset.to_dataframe()
-        dates = df['time_bnds']
-        desired_years_set = set()
-        years_found_set = set()
-        desired_years = ['2010', '2011', '2012','2013', '2014',
-                         '2015', '2016', '2017', '2018', '2019']
+def _get_first_year(ds):
+    first_year = ds.variables['time_bnds'][0].data[0].strftime('%Y')
+    return first_year
 
-        for i in dates:
-            year = i.strftime('%Y')
-            years_found_set.add(year)
-            if year in desired_years:
-                desired_years_set.add(year)
-        return SortedSet(years_found_set), SortedSet(desired_years_set)
+def _check_for_years(ds):
+    """
+    Get through all years in a dataset
+    :param ds: a netCDF4 file
+    :return: set of years (should return years 2010 to 2019)
+    """
+    # convert to Pandas data frame
+    df = ds.to_dataframe()
+    dates = df['time_bnds']
+    desired_years_set = set()
+    # years_found_set = set()
+
+    for i in dates:
+        year = i.strftime('%Y')
+        # years_found_set.add(year)
+        if str(2009) < year < str(2020):
+            desired_years_set.add(year)
+    return desired_years_set
+
+
+def get_years(dataset):
+    """
+        :param dataset: netCDF4 file or files
+        :return: None: if the dataset does not include years 2010 to 2019
+                 valid_files: a list of files which contain years 2010 to 2019
+    """
+    valid_files = []
+    if isinstance(dataset, str):
+        with xr.open_dataset(dataset) as ds:
+            year = _get_first_year(ds)
+            print(year)
+            if year > '2019':
+                return None
+            desired_years = _check_for_years(ds)
+            if len(desired_years) == 10:
+                valid_files.append(dataset)
+
+
+    else:
+        for file in dataset:
+            with xr.open_dataset(file, autoclose=True) as ds:
+                year = _get_first_year(ds)
+                print(year)
+                if year > '2019':
+                    continue
+                desired_years = _check_for_years(ds)
+                if len(desired_years) == 10:
+                    valid_files.append(file)
+    return valid_files
 
 
 def couple_subset(files):
-    """ return list of tuples of all subsets of length couple """
+    """ Returns all possible couples of files """
     couple = 2
     return list(combinations(files, couple))
 
 
 def open_mfdatasets(files_to_open):
+    """
+        Test if a couple of data sets can be aggregated together
+        and add them into a set if so
+
+        :param files_to_open: found netCDF4 files
+        :return: opened netCDF data sets using `open_mfdataset`
+    """
     correct_dataset_couples = []
     for combination in files_to_open:
         try:
@@ -43,5 +83,4 @@ def open_mfdatasets(files_to_open):
     correct_dataset = set()
     for elements in correct_dataset_couples:
         correct_dataset.update(elements)
-    print(correct_dataset)
-    return xr.open_mfdataset(correct_dataset, concat_dim='time', combine='by_coords')
+    return xr.open_mfdataset(correct_dataset)
