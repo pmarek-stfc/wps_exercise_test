@@ -17,6 +17,7 @@ def _check_for_years(ds):
     # convert to Pandas data frame
     df = ds.to_dataframe()
     dates = df['time_bnds']
+    dates = dates[0::12]
     desired_years_set = set()
     # years_found_set = set()
 
@@ -70,7 +71,6 @@ def open_mfdatasets(files_to_open):
     """
         Test if a couple of data sets can be aggregated together
         and add them into a set if so
-
         :param files_to_open: found netCDF4 files
         :return: opened netCDF data sets using `open_mfdataset`
     """
