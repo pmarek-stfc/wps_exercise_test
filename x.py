@@ -4,7 +4,8 @@ from itertools import combinations
 
 
 def _get_first_year(ds):
-    first_year = ds.variables['time_bnds'][0].data[0].strftime('%Y')
+    # first_year = ds.variables['time_bnds'][0].data[0].strftime('%Y')
+    first_year = int(ds.time.dt.year[0])
     return first_year
 
 def _check_for_years(ds):
@@ -38,7 +39,7 @@ def get_years(dataset):
         with xr.open_dataset(dataset) as ds:
             year = _get_first_year(ds)
             print(year)
-            if year > '2019':
+            if year > 2019:
                 return None
             desired_years = _check_for_years(ds)
             if len(desired_years) == 10:
@@ -47,10 +48,10 @@ def get_years(dataset):
 
     else:
         for file in dataset:
-            with xr.open_dataset(file, autoclose=True) as ds:
+            with xr.open_dataset(file) as ds:
                 year = _get_first_year(ds)
                 print(year)
-                if year > '2019':
+                if year > 2019:
                     continue
                 desired_years = _check_for_years(ds)
                 if len(desired_years) == 10:
