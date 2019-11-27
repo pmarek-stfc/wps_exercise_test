@@ -22,8 +22,9 @@ def _check_for_years(ds):
 
     for i in dates:
         year = i.strftime('%Y')
+        print(year)
         # years_found_set.add(year)
-        if str(2009) < year < str(2020):
+        if 2009 < int(year) < 2020:
             desired_years_set.add(year)
     return desired_years_set
 
@@ -38,7 +39,7 @@ def get_years(dataset):
     if isinstance(dataset, str):
         with xr.open_dataset(dataset) as ds:
             year = _get_first_year(ds)
-            print(year)
+            print(f'working with: {dataset}, first year is: {year}')
             if year > 2019:
                 return None
             desired_years = _check_for_years(ds)
@@ -50,7 +51,7 @@ def get_years(dataset):
         for file in dataset:
             with xr.open_dataset(file) as ds:
                 year = _get_first_year(ds)
-                print(year)
+                print(f'working with: {file}, first year is: {year}')
                 if year > 2019:
                     continue
                 desired_years = _check_for_years(ds)
