@@ -33,6 +33,7 @@ def open_mfdatasets(files_to_open):
         :return: opened netCDF data sets using `open_mfdataset`
     """
     try:
+        # ALWAYS USE combine='by_coords' with open_mfdataset
         with xr.open_mfdataset(files_to_open, combine='by_coords') as ds:
             return ds
     except Exception as e:
