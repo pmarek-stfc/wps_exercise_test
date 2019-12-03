@@ -1,8 +1,13 @@
 import xarray as xr
-from itertools import combinations
+# from itertools import combinations
 
 
 def _get_years(dataset):
+    """
+        Check if a dataset contains a specific range of years
+        :param dataset: a NetCDF4 file
+        :return: a file containing years 2010-2020
+    """
     REQ_YEARS = set([int(_) for _ in range(2010, 2020)])
     ds = xr.open_dataset(dataset)
     years = set([int(_) for _ in ds.time.dt.year])
@@ -11,6 +16,10 @@ def _get_years(dataset):
         return dataset
 
 def get_years(fpaths):
+    """
+        :param fpaths: path to files
+        :return: list of files containing specific range of years
+    """
     files_in_range = []
 
     for fpath in fpaths:
@@ -27,10 +36,8 @@ def get_years(fpaths):
 
 def open_mfdatasets(files_to_open):
     """
-        Test if a couple of data sets can be aggregated together
-        and add them into a set if so
-        :param files_to_open: found netCDF4 files
-        :return: opened netCDF data sets using `open_mfdataset`
+        :param files_to_open: netCDF4 files
+        :return: opened netCDF datasets using `open_mfdataset`
     """
     try:
         # ALWAYS USE combine='by_coords' with open_mfdataset
